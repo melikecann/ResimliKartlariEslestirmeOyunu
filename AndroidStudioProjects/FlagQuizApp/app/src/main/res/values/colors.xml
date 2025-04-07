@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
-    <color name="light_blue">#87CEEB</color> <!-- Açık mavi arka plan -->
-    <color name="blue_gray">#607D8B</color> <!-- Genel bilgi için koyu mavi-gri -->
-
-</resources>
