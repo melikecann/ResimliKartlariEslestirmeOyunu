@@ -1,190 +1,131 @@
-import java.awt.*;
-import java.awt.event.*;
-import java.util.ArrayList;
 import javax.swing.*;
+import java.awt.*;
+import java.util.ArrayList;
 
-public class MatchCards {
-    class Card {
-        String cardName;
-        ImageIcon cardImageIcon;
+public class MatchCards extends JFrame {
+    private final int rows = 4;
+    private final int columns = 5;
+    private final int cardWidth = 90;
+    private final int cardHeight = 128;
 
-        Card(String cardName, ImageIcon cardImageIcon) {
-            this.cardName = cardName;
-            this.cardImageIcon = cardImageIcon;
-        }
-
-        public String toString() {
-            return cardName;
-        }
-    }
-
-    String[] cardList = {
-            "country cousin", "donna duck", "mickey mouse", "mickeys amateur", "moth and flame",
-            "postman", "snow white", "the giant", "three little pigs", "witch"
+    private final String[] cardList = {
+        "country cousin", "donna duck", "mickey mouse", "mickeys amateur", "moth and flame",
+        "postman", "snow white", "the giant", "three little pigs", "witch"
     };
 
-    int rows = 4;
-    int columns = 5;
-    int cardWidth = 90;
-    int cardHeight = 128;
+    private final GameBoard gameBoard;
+    private ImageIcon cardBackImageIcon;
 
-    ArrayList<Card> cardSet;
-    ImageIcon cardBackImageIcon;
+    private JLabel textLabel;
+    private JPanel boardPanel;
+    private JButton restartButton;
 
-    int boardWidth = columns * cardWidth;
-    int boardHeight = rows * cardHeight;
+    private int errorCount = 0;
+    private final ArrayList<JButton> boardButtons = new ArrayList<>();
+    private JButton card1Selected;
+    private JButton card2Selected;
+    private Timer hideCardTimer;
+    private boolean gameReady = false;
 
-    JFrame frame = new JFrame("Disney Match Cards");
-    JLabel textLabel = new JLabel();
-    JPanel textPanel = new JPanel();
-    JPanel boardPanel = new JPanel();
-    JPanel restartGamePanel = new JPanel();
-    JButton restartButton = new JButton();
+    public MatchCards() {
+        super("Disney Match Cards"); // JFrame başlığı
+        initializeCardBack();
+        gameBoard = new GameBoard(cardList, cardWidth, cardHeight);
+        setupUI();
+        setupGameBoard();
+    }
 
-    int errorCount = 0;
-    ArrayList<JButton> board = new ArrayList<>();
-    Timer hideCardTimer;
-    boolean gameReady = false;
-    JButton card1Selected;
-    JButton card2Selected;
+    private void initializeCardBack() {
+        String path = "resources/img/back.jpg";
+        Image backImg = new ImageIcon(path).getImage();
+        cardBackImageIcon = new ImageIcon(backImg.getScaledInstance(cardWidth, cardHeight, Image.SCALE_SMOOTH));
+    }
 
-    MatchCards() {
-        setupCards();
-        shuffleCards();
+    private void setupUI() {
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLayout(new BorderLayout());
+        setSize(columns * cardWidth, rows * cardHeight + 60);
+        setLocationRelativeTo(null);
+        setResizable(false);
 
-        frame.setVisible(true);
-        frame.setLayout(new BorderLayout());
-        frame.setSize(boardWidth, boardHeight);
-        frame.setLocationRelativeTo(null);
-        frame.setResizable(false);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
+        textLabel = new JLabel("Errors: " + errorCount, SwingConstants.CENTER);
         textLabel.setFont(new Font("Arial", Font.PLAIN, 20));
-        textLabel.setHorizontalAlignment(JLabel.CENTER);
-        textLabel.setText("Errors: " + errorCount);
+        add(textLabel, BorderLayout.NORTH);
 
-        textPanel.setPreferredSize(new Dimension(boardWidth, 30));
-        textPanel.add(textLabel);
-        frame.add(textPanel, BorderLayout.NORTH);
+        boardPanel = new JPanel(new GridLayout(rows, columns));
+        add(boardPanel, BorderLayout.CENTER);
 
-        boardPanel.setLayout(new GridLayout(rows, columns));
+        restartButton = new JButton("Restart Game");
+        restartButton.setFont(new Font("Arial", Font.PLAIN, 16));
+        restartButton.setEnabled(false);
+        restartButton.addActionListener(_ -> restartGame());
+        add(restartButton, BorderLayout.SOUTH);
 
-        for (int i = 0; i < cardSet.size(); i++) {
-            JButton tile = new JButton();
-            tile.setPreferredSize(new Dimension(cardWidth, cardHeight));
-            tile.setOpaque(true);
-            tile.setIcon(cardBackImageIcon);
-            tile.setFocusable(false);
+        hideCardTimer = new Timer(1500, _ -> hideUnmatchedCards());
+        hideCardTimer.setRepeats(false);
 
-            int index = i;
-            tile.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    if (!gameReady) return;
+        setVisible(true);
+    }
 
-                    JButton clicked = (JButton) e.getSource();
-                    int idx = board.indexOf(clicked);
-                    if (clicked.getIcon().equals(cardBackImageIcon)) {
-                        clicked.setIcon(cardSet.get(idx).cardImageIcon);
+    private void setupGameBoard() {
+        boardButtons.clear();
+        boardPanel.removeAll();
 
-                        if (card1Selected == null) {
-                            card1Selected = clicked;
-                        } else if (card2Selected == null) {
-                            card2Selected = clicked;
+        ArrayList<Card> cards = gameBoard.getCards();
 
-                            if (!card1Selected.getIcon().equals(card2Selected.getIcon())) {
-                                errorCount++;
-                                textLabel.setText("Errors: " + errorCount);
-                                hideCardTimer.start();
-                            } else {
-                                card1Selected = null;
-                                card2Selected = null;
-                            }
-                        }
-                    }
-                }
-            });
+        for (int i = 0; i < cards.size(); i++) {
+            JButton button = new JButton();
+            button.setPreferredSize(new Dimension(cardWidth, cardHeight));
+            button.setIcon(cardBackImageIcon);
+            final int index = i;
 
-            board.add(tile);
-            boardPanel.add(tile);
+            button.addActionListener(_ -> handleCardClick(index));
+
+            boardButtons.add(button);
+            boardPanel.add(button);
         }
 
-        frame.add(boardPanel);
+        revalidate();
+        repaint();
 
-        restartButton.setFont(new Font("Arial", Font.PLAIN, 16));
-        restartButton.setText("Restart Game");
-        restartButton.setPreferredSize(new Dimension(boardWidth, 30));
-        restartButton.setFocusable(false);
-        restartButton.setEnabled(false);
-        restartButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (!gameReady) return;
+        gameReady = false;
+        hideCardTimer.start(); // başta hepsini saklayacak
+    }
 
-                gameReady = false;
-                restartButton.setEnabled(false);
-                card1Selected = null;
-                card2Selected = null;
-                shuffleCards();
+    private void handleCardClick(int index) {
+        if (!gameReady) return;
 
-                for (int i = 0; i < board.size(); i++) {
-                    board.get(i).setIcon(cardBackImageIcon);
-                }
+        JButton clicked = boardButtons.get(index);
+        Card card = gameBoard.getCards().get(index);
 
-                errorCount = 0;
+        if (clicked.getIcon() != cardBackImageIcon) return; // zaten açık
+
+        clicked.setIcon(card.getImageIcon());
+
+        if (card1Selected == null) {
+            card1Selected = clicked;
+        } else if (card2Selected == null && clicked != card1Selected) {
+            card2Selected = clicked;
+
+            if (!card1Selected.getIcon().equals(card2Selected.getIcon())) {
+                errorCount++;
                 textLabel.setText("Errors: " + errorCount);
                 hideCardTimer.start();
+            } else {
+                card1Selected = null;
+                card2Selected = null;
             }
-        });
-
-        restartGamePanel.add(restartButton);
-        frame.add(restartGamePanel, BorderLayout.SOUTH);
-
-        frame.pack();
-        frame.setVisible(true);
-
-        hideCardTimer = new Timer(1500, new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                hideCards();
-            }
-        });
-
-        hideCardTimer.setRepeats(false);
-        hideCardTimer.start();
-    }
-
-    void setupCards() {
-        cardSet = new ArrayList<>();
-        for (String cardName : cardList) {
-            Image cardImg = new ImageIcon(getClass().getResource("./img/" + cardName + ".jpg")).getImage();
-            ImageIcon carImageIcon = new ImageIcon(cardImg.getScaledInstance(cardWidth, cardHeight, Image.SCALE_SMOOTH));
-            Card card = new Card(cardName, carImageIcon);
-            cardSet.add(card);
-        }
-        cardSet.addAll(new ArrayList<>(cardSet)); // double cards = 20
-
-        Image cardBackImg = new ImageIcon(getClass().getResource("./img/back.jpg")).getImage();
-        cardBackImageIcon = new ImageIcon(cardBackImg.getScaledInstance(cardWidth, cardHeight, Image.SCALE_SMOOTH));
-    }
-
-    void shuffleCards() {
-        for (int i = 0; i < cardSet.size(); i++) {
-            int j = (int) (Math.random() * cardSet.size());
-            Card temp = cardSet.get(i);
-            cardSet.set(i, cardSet.get(j));
-            cardSet.set(j, temp);
         }
     }
 
-    void hideCards() {
-        if (gameReady && card1Selected != null && card2Selected != null) {
+    private void hideUnmatchedCards() {
+        if (card1Selected != null && card2Selected != null) {
             card1Selected.setIcon(cardBackImageIcon);
             card2Selected.setIcon(cardBackImageIcon);
             card1Selected = null;
             card2Selected = null;
         } else {
-            for (JButton btn : board) {
+            for (JButton btn : boardButtons) {
                 btn.setIcon(cardBackImageIcon);
             }
             gameReady = true;
@@ -192,7 +133,14 @@ public class MatchCards {
         }
     }
 
-    public static void main(String[] args) {
-        new MatchCards();
+    private void restartGame() {
+        gameBoard.shuffleCards();
+        errorCount = 0;
+        textLabel.setText("Errors: " + errorCount);
+        card1Selected = null;
+        card2Selected = null;
+        gameReady = false;
+        restartButton.setEnabled(false);
+        setupGameBoard();
     }
 }

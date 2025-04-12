@@ -1,0 +1,16 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "type": "java",
+        "name": "MemoryCard Oyunu",
+        "request": "launch",
+        "mainClass": "Main",
+        "cwd": "${workspaceFolder}",
+        "classPaths": [
+          "${workspaceFolder}/bin",
+          "${workspaceFolder}/resources"
+        ]
+      }
+    ]
+  }
