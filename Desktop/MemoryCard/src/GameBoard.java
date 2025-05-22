@@ -5,7 +5,7 @@ import java.awt.*;
     
 public class GameBoard {
     
-        private ArrayList<Card> cards;
+        private ArrayList<ICard> cards;
         private final int cardWidth;
         private final int cardHeight;
 
@@ -28,6 +28,8 @@ public class GameBoard {
                 Image img = new ImageIcon(getClass().getResource("/img/" + name + ".jpg")).getImage();
                 //görsel yeniden boyutlandırılır kaliteli küçültülür
                 ImageIcon icon = new ImageIcon(img.getScaledInstance(cardWidth, cardHeight, Image.SCALE_SMOOTH));
+                // ICard türünde nesne olarak Card oluşturuluyor
+                ICard card = new Card(name, icon);
                 //Card isminde yeni bir nesne (kart) oluşturulur ve cards listesine eklenir
                 cards.add(new Card(name, icon));
             }
@@ -40,7 +42,7 @@ public class GameBoard {
             Collections.shuffle(cards);
         }
     
-        public ArrayList<Card> getCards() {
+        public ArrayList<ICard> getCards() {
             //başka sınıflar bu metto sayesinde cards listesine erişebilir
             return cards;
         }

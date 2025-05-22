@@ -2,7 +2,7 @@ import java.awt.*;
 import java.util.ArrayList;
 import javax.swing.*;
 
-public class MatchCards extends JFrame {
+public class MatchCards extends JFrame {    //INHERITANCE Kalıtım
     private final int rows = 4;
     private final int columns = 5;
     private final int cardWidth = 90;
@@ -86,7 +86,7 @@ public class MatchCards extends JFrame {
         boardPanel.removeAll();
         
         //kart listesini alıyor
-        ArrayList<Card> cards = gameBoard.getCards();
+        ArrayList<ICard> cards = gameBoard.getCards();
     
 
         for (int i = 0; i < cards.size(); i++) {
@@ -125,7 +125,7 @@ public class MatchCards extends JFrame {
         //tıklanan kartın butonunu alıyor
         JButton clicked = boardButtons.get(index); 
         //butona ait olan kartın verisini görselini alıyoruz
-        Card card = gameBoard.getCards().get(index);
+        ICard card = gameBoard.getCards().get(index);
 
         // kartın ön yüzü görünürken tekrar tıklayamayız
         if (clicked.getIcon() != cardBackImageIcon) return;

@@ -1,33 +1,34 @@
+import javax.swing.ImageIcon;
 
-import javax.swing.*;
+public class Card implements ICard {    //INHERITANCE Kalıtım
+    private String name;    //ENCAPSULATION Kapsülleme
+    private ImageIcon imageIcon;    //ENCAPSULATION Kapsülleme
 
-//diğer sınıflardan erişilebilir public
-public class Card {
-    private String name;
-    //ön yüz görseli imageIcon
-    private ImageIcon imageIcon;
-
-    //constructor metot, nesnenin adını ve görselini belirliyor
+    //constructor metot
     public Card(String name, ImageIcon imageIcon) {
-        //thisler sayesinde gelen değer sınıfa kaydedilir
+        //parametreleri sınıf içindeki değişkenlere aktarır
         this.name = name;
         this.imageIcon = imageIcon;
     }
 
-    //name private tanımlandığı için kartın ismini dışardan bu getter metotu ile öğreniyoruz
+    //ICard arayüzünde zorunlu olan getName'in gövdesidir
+    //kartın ismini döndürür
+    @Override
     public String getName() {
         return name;
     }
 
+    //diğer zorunlu metot, görsel döndürür
+    @Override
     public ImageIcon getImageIcon() {
         return imageIcon;
     }
 
-    //bir nesneyi yazdırmak istediğimizde ne gözükeceğini toString() belirler
-    //normalde System.out.println(card) yazarsak karışık bir ifade çıkar
+    //toString() metodu javada nesne metin olarak yazdırıldığında ne çıkacağını tanımlar
+    //kartın ismi yani
+    //System.out.println(card) şeklinde yazarsak karışık şeyler yazabilir
     @Override
     public String toString() {
         return name;
     }
 }
-
