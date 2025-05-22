@@ -1,6 +1,6 @@
-import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
+import javax.swing.*;
 
 public class MatchCards extends JFrame {
     private final int rows = 4;
@@ -70,28 +70,32 @@ public class MatchCards extends JFrame {
     private void setupGameBoard() {
         boardButtons.clear();
         boardPanel.removeAll();
-
+    
         ArrayList<Card> cards = gameBoard.getCards();
-
+    
         for (int i = 0; i < cards.size(); i++) {
             JButton button = new JButton();
             button.setPreferredSize(new Dimension(cardWidth, cardHeight));
-            button.setIcon(cardBackImageIcon);
+    
+            // Oyun başında kartı geçici olarak açık gösteriyoruz
+            button.setIcon(cards.get(i).getImageIcon());
+    
             final int index = i;
-
             button.addActionListener(_ -> handleCardClick(index));
-
+    
             boardButtons.add(button);
             boardPanel.add(button);
         }
-
+    
         revalidate();
         repaint();
-
+    
         gameReady = false;
-        hideCardTimer.start(); // başta hepsini saklayacak
+    
+        // 1.5 saniye sonra tüm kartları kapat
+        hideCardTimer.start();
     }
-
+    
     private void handleCardClick(int index) {
         if (!gameReady) return;
 

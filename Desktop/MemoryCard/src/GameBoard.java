@@ -1,7 +1,7 @@
-import javax.swing.*;
-    import java.awt.*;
+import java.awt.*;
     import java.util.ArrayList;
     import java.util.Collections;
+    import javax.swing.*;
     
 public class GameBoard {
     
@@ -9,7 +9,8 @@ public class GameBoard {
         private final int cardWidth;
         private final int cardHeight;
     
-        public GameBoard(String[] cardNames, int cardWidth, int cardHeight) {
+        public GameBoard(
+            String[] cardNames, int cardWidth, int cardHeight) {
             this.cardWidth = cardWidth;
             this.cardHeight = cardHeight;
             this.cards = new ArrayList<>();
